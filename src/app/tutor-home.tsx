@@ -1,5 +1,7 @@
+import { useAuth } from '../context/AuthContext';
 import { router } from 'expo-router';
 import {
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -7,8 +9,28 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors, radius, spacing } from '../theme';
 
 export default function TutorHomeScreen() {
+  const { user, logout } = useAuth();
+
+  const profile = user?.tutorProfile;
+
+  const firstName =
+    user?.name?.split(' ')[0] || 'Tutor';
+
+  const subjects = profile?.subjects
+    ? profile.subjects
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : [];
+
+  const handleLogout = () => {
+    logout();
+    router.replace('/login');
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -16,209 +38,342 @@ export default function TutorHomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
+
         <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>Hello, Tutor</Text>
-            <Text style={styles.title}>Tutor Dashboard</Text>
+          <Image
+            source={require('../../assets/guriva-horizontal-logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+
+          <TouchableOpacity
+            style={styles.notificationButton}
+            onPress={() =>
+              router.push('/notifications')
+            }
+            activeOpacity={0.8}
+          >
+            <Text style={styles.notificationIcon}>
+              🔔
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Welcome */}
+
+        <View style={styles.welcomeSection}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>
+              {user?.name?.charAt(0)?.toUpperCase() || 'T'}
+            </Text>
+          </View>
+
+          <View style={styles.welcomeContent}>
+            <Text style={styles.greeting}>
+              Welcome back,
+            </Text>
+
+            <Text style={styles.name}>
+              {firstName} 👋
+            </Text>
+
+            <Text style={styles.subtitle}>
+              Manage your teaching journey with Guriva.
+            </Text>
+          </View>
+        </View>
+
+        {/* Profile status */}
+
+        <View style={styles.profileStatusCard}>
+          <View style={styles.statusTop}>
+            <View>
+              <Text style={styles.statusTitle}>
+                Tutor profile
+              </Text>
+
+              <Text style={styles.statusSubtitle}>
+                {profile
+                  ? 'Your profile is ready to be discovered.'
+                  : 'Complete your profile to get started.'}
+              </Text>
+            </View>
+
+            <View
+              style={[
+                styles.statusBadge,
+                profile
+                  ? styles.statusReady
+                  : styles.statusIncomplete,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.statusText,
+                  profile
+                    ? styles.statusReadyText
+                    : styles.statusIncompleteText,
+                ]}
+              >
+                {profile ? 'Ready' : 'Incomplete'}
+              </Text>
+            </View>
           </View>
 
           <TouchableOpacity
             style={styles.profileButton}
-            onPress={() => router.push('/tutor-profile-preview')}
+            onPress={() =>
+              router.push('/tutor-profile-preview')
+            }
+            activeOpacity={0.8}
           >
-            <Text style={styles.profileText}>T</Text>
+            <Text style={styles.profileButtonText}>
+              View Profile
+            </Text>
+
+            <Text style={styles.arrow}>
+              →
+            </Text>
           </TouchableOpacity>
-        </View>
-
-        {/* Earnings */}
-        <View style={styles.earningsCard}>
-          <Text style={styles.earningsLabel}>
-            This month
-          </Text>
-
-          <Text style={styles.earningsAmount}>
-            ₹12,500
-          </Text>
-
-          <Text style={styles.earningsNote}>
-            Estimated earnings
-          </Text>
         </View>
 
         {/* Stats */}
-        <View style={styles.statsRow}>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>8</Text>
-            <Text style={styles.statLabel}>Students</Text>
-          </View>
 
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>24</Text>
-            <Text style={styles.statLabel}>Classes</Text>
-          </View>
-
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>4.8</Text>
-            <Text style={styles.statLabel}>Rating</Text>
-          </View>
-        </View>
-
-        {/* Today's class */}
         <Text style={styles.sectionTitle}>
-          Today's class
+          Your activity
         </Text>
 
-        <View style={styles.classCard}>
-          <View style={styles.classIcon}>
-            <Text style={styles.classIconText}>M</Text>
-          </View>
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>0</Text>
 
-          <View style={styles.classInfo}>
-            <Text style={styles.classTitle}>
-              Mathematics
-            </Text>
-
-            <Text style={styles.classStudent}>
-              Rahul Sharma
-            </Text>
-
-            <Text style={styles.classTime}>
-              5:00 PM • Online
+            <Text style={styles.statLabel}>
+              Enquiries
             </Text>
           </View>
 
-          <View style={styles.onlineBadge}>
-            <Text style={styles.onlineText}>
-              Online
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>0</Text>
+
+            <Text style={styles.statLabel}>
+              Classes
+            </Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>₹0</Text>
+
+            <Text style={styles.statLabel}>
+              Earnings
             </Text>
           </View>
         </View>
 
-        {/* Student requests */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>
-            Student requests
-          </Text>
+        {/* Subjects */}
 
-          <TouchableOpacity
-            onPress={() => router.push('/tutor-enquiries')}
-          >
-            <Text style={styles.seeAll}>
-              See all
+        <Text style={styles.sectionTitle}>
+          Your subjects
+        </Text>
+
+        <View style={styles.subjectCard}>
+          {subjects.length > 0 ? (
+            <View style={styles.subjects}>
+              {subjects.map((subject, index) => (
+                <View
+                  key={`${subject}-${index}`}
+                  style={styles.subjectChip}
+                >
+                  <Text style={styles.subjectText}>
+                    {subject}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.emptyText}>
+              Add your subjects to help students find you.
             </Text>
-          </TouchableOpacity>
+          )}
         </View>
 
-        <View style={styles.requestCard}>
-          <View style={styles.studentAvatar}>
-            <Text style={styles.studentAvatarText}>
-              A
-            </Text>
+        {/* Teaching information */}
+
+        <Text style={styles.sectionTitle}>
+          Teaching information
+        </Text>
+
+        <View style={styles.infoCard}>
+          <View style={styles.infoRow}>
+            <View style={styles.infoIcon}>
+              <Text style={styles.infoIconText}>
+                ★
+              </Text>
+            </View>
+
+            <View style={styles.infoContent}>
+              <Text style={styles.infoLabel}>
+                Experience
+              </Text>
+
+              <Text style={styles.infoValue}>
+                {profile?.experience || 'Not added'}
+              </Text>
+            </View>
           </View>
 
-          <View style={styles.requestInfo}>
-            <Text style={styles.requestName}>
-              Ananya Verma
-            </Text>
+          <View style={styles.divider} />
 
-            <Text style={styles.requestSubject}>
-              Physics • Class 12
-            </Text>
+          <View style={styles.infoRow}>
+            <View style={styles.infoIcon}>
+              <Text style={styles.infoIconText}>
+                ✓
+              </Text>
+            </View>
 
-            <Text style={styles.requestTime}>
-              New request
-            </Text>
+            <View style={styles.infoContent}>
+              <Text style={styles.infoLabel}>
+                Qualification
+              </Text>
+
+              <Text style={styles.infoValue}>
+                {profile?.qualification ||
+                  'Not added'}
+              </Text>
+            </View>
           </View>
 
-          <TouchableOpacity
-            style={styles.viewButton}
-            onPress={() => router.push('/tutor-enquiries')}
-          >
-            <Text style={styles.viewButtonText}>
-              View
-            </Text>
-          </TouchableOpacity>
+          <View style={styles.divider} />
+
+          <View style={styles.infoRow}>
+            <View style={styles.infoIcon}>
+              <Text style={styles.infoIconText}>
+                ↗
+              </Text>
+            </View>
+
+            <View style={styles.infoContent}>
+              <Text style={styles.infoLabel}>
+                Teaching mode
+              </Text>
+
+              <Text style={styles.infoValue}>
+                {profile?.mode || 'Not added'}
+              </Text>
+            </View>
+          </View>
         </View>
 
         {/* Quick actions */}
+
         <Text style={styles.sectionTitle}>
           Quick actions
         </Text>
 
-        <TouchableOpacity
-          style={styles.menuButton}
-          onPress={() => router.push('/tutor-enquiries')}
-        >
-          <View style={styles.menuIcon}>
-            <Text style={styles.menuIconText}>✓</Text>
-          </View>
+        <View style={styles.actionsCard}>
+          <TouchableOpacity
+            style={styles.actionRow}
+            onPress={() =>
+              router.push('/tutor-enquiries')
+            }
+            activeOpacity={0.75}
+          >
+            <View style={styles.actionIcon}>
+              <Text style={styles.actionIconText}>
+                ?
+              </Text>
+            </View>
 
-          <View style={styles.menuInfo}>
-            <Text style={styles.menuTitle}>
-              Student Enquiries
+            <View style={styles.actionContent}>
+              <Text style={styles.actionTitle}>
+                Student enquiries
+              </Text>
+
+              <Text style={styles.actionSubtitle}>
+                View and respond to student requests.
+              </Text>
+            </View>
+
+            <Text style={styles.actionArrow}>
+              →
             </Text>
+          </TouchableOpacity>
 
-            <Text style={styles.menuSubtitle}>
-              View and respond to student requests
+          <View style={styles.divider} />
+
+          <TouchableOpacity
+            style={styles.actionRow}
+            onPress={() =>
+              router.push('/tutor-availability')
+            }
+            activeOpacity={0.75}
+          >
+            <View style={styles.actionIcon}>
+              <Text style={styles.actionIconText}>
+                ◷
+              </Text>
+            </View>
+
+            <View style={styles.actionContent}>
+              <Text style={styles.actionTitle}>
+                Availability
+              </Text>
+
+              <Text style={styles.actionSubtitle}>
+                Set when you are available to teach.
+              </Text>
+            </View>
+
+            <Text style={styles.actionArrow}>
+              →
             </Text>
-          </View>
+          </TouchableOpacity>
 
-          <Text style={styles.menuArrow}>›</Text>
-        </TouchableOpacity>
+          <View style={styles.divider} />
 
-        <TouchableOpacity
-          style={styles.menuButton}
-          onPress={() => router.push('/tutor-availability')}
-        >
-          <View style={styles.menuIcon}>
-            <Text style={styles.menuIconText}>◷</Text>
-          </View>
+          <TouchableOpacity
+            style={styles.actionRow}
+            onPress={() =>
+              router.push('/tutor-edit-profile')
+            }
+            activeOpacity={0.75}
+          >
+            <View style={styles.actionIcon}>
+              <Text style={styles.actionIconText}>
+                ✎
+              </Text>
+            </View>
 
-          <View style={styles.menuInfo}>
-            <Text style={styles.menuTitle}>
-              Manage Availability
+            <View style={styles.actionContent}>
+              <Text style={styles.actionTitle}>
+                Edit profile
+              </Text>
+
+              <Text style={styles.actionSubtitle}>
+                Update your teaching information.
+              </Text>
+            </View>
+
+            <Text style={styles.actionArrow}>
+              →
             </Text>
-
-            <Text style={styles.menuSubtitle}>
-              Set your available days and times
-            </Text>
-          </View>
-
-          <Text style={styles.menuArrow}>›</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.menuButton}
-          onPress={() => router.push('/tutor-edit-profile')}
-        >
-          <View style={styles.menuIcon}>
-            <Text style={styles.menuIconText}>✎</Text>
-          </View>
-
-          <View style={styles.menuInfo}>
-            <Text style={styles.menuTitle}>
-              Edit Profile
-            </Text>
-
-            <Text style={styles.menuSubtitle}>
-              Update your tutor information
-            </Text>
-          </View>
-
-          <Text style={styles.menuArrow}>›</Text>
-        </TouchableOpacity>
-
-        {/* Dashboard note */}
-        <View style={styles.noteCard}>
-          <Text style={styles.noteTitle}>
-            Keep your profile updated
-          </Text>
-
-          <Text style={styles.noteText}>
-            Students can find you based on your subjects,
-            experience, teaching mode and availability.
-          </Text>
+          </TouchableOpacity>
         </View>
+
+        {/* Logout */}
+
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={handleLogout}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.logoutText}>
+            Log out
+          </Text>
+        </TouchableOpacity>
+
+        <Text style={styles.footer}>
+          Guriva · Learn. Connect. Grow.
+        </Text>
 
         <View style={styles.bottomSpace} />
       </ScrollView>
@@ -229,318 +384,364 @@ export default function TutorHomeScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
 
   container: {
-    paddingHorizontal: 20,
-    paddingTop: 15,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.md,
     paddingBottom: 30,
   },
 
   header: {
+    height: 52,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 22,
+    justifyContent: 'space-between',
   },
 
-  greeting: {
-    fontSize: 14,
-    color: '#64748B',
-    marginBottom: 4,
+  logo: {
+    width: 135,
+    height: 45,
   },
 
-  title: {
-    fontSize: 27,
-    fontWeight: '800',
-    color: '#0F172A',
-  },
-
-  profileButton: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: '#DBEAFE',
+  notificationButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  profileText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#2563EB',
+  notificationIcon: {
+    fontSize: 17,
   },
 
-  earningsCard: {
-    backgroundColor: '#2563EB',
-    borderRadius: 18,
-    padding: 20,
-    marginBottom: 16,
-  },
-
-  earningsLabel: {
-    fontSize: 13,
-    color: '#DBEAFE',
-    marginBottom: 5,
-  },
-
-  earningsAmount: {
-    fontSize: 30,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-
-  earningsNote: {
-    fontSize: 12,
-    color: '#DBEAFE',
-  },
-
-  statsRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 22,
-  },
-
-  statCard: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    paddingVertical: 16,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-
-  statNumber: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#0F172A',
-    marginBottom: 4,
-  },
-
-  statLabel: {
-    fontSize: 11,
-    color: '#64748B',
-  },
-
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginBottom: 12,
-    marginTop: 6,
-  },
-
-  classCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
+  welcomeSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 22,
+    marginTop: 21,
+    marginBottom: 21,
   },
 
-  classIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#DBEAFE',
+  avatar: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: colors.navy,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 13,
   },
 
-  classIconText: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#2563EB',
+  avatarText: {
+    fontSize: 23,
+    fontWeight: '900',
+    color: colors.teal,
   },
 
-  classInfo: {
+  welcomeContent: {
     flex: 1,
   },
 
-  classTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginBottom: 4,
+  greeting: {
+    fontSize: 11,
+    color: colors.textSecondary,
   },
 
-  classStudent: {
-    fontSize: 13,
-    color: '#475569',
-    marginBottom: 3,
+  name: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: colors.navy,
+    marginTop: 1,
   },
 
-  classTime: {
-    fontSize: 12,
-    color: '#94A3B8',
+  subtitle: {
+    fontSize: 10,
+    lineHeight: 15,
+    color: colors.textSecondary,
+    marginTop: 3,
   },
 
-  onlineBadge: {
-    backgroundColor: '#DCFCE7',
-    borderRadius: 8,
-    paddingHorizontal: 8,
+  profileStatusCard: {
+    backgroundColor: colors.white,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.lg,
+  },
+
+  statusTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+
+  statusTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: colors.navy,
+  },
+
+  statusSubtitle: {
+    fontSize: 10,
+    color: colors.textSecondary,
+    marginTop: 4,
+    maxWidth: 210,
+  },
+
+  statusBadge: {
+    borderRadius: radius.round,
+    paddingHorizontal: 9,
     paddingVertical: 5,
   },
 
-  onlineText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#16A34A',
+  statusReady: {
+    backgroundColor: colors.successLight,
   },
 
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  statusIncomplete: {
+    backgroundColor: colors.warningLight,
   },
 
-  seeAll: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#2563EB',
-    marginBottom: 12,
-  },
-
-  requestCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 22,
-  },
-
-  studentAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#DBEAFE',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-
-  studentAvatarText: {
-    fontSize: 18,
+  statusText: {
+    fontSize: 9,
     fontWeight: '800',
-    color: '#2563EB',
   },
 
-  requestInfo: {
-    flex: 1,
+  statusReadyText: {
+    color: colors.success,
   },
 
-  requestName: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginBottom: 4,
+  statusIncompleteText: {
+    color: colors.warning,
   },
 
-  requestSubject: {
-    fontSize: 13,
-    color: '#475569',
-    marginBottom: 3,
-  },
-
-  requestTime: {
-    fontSize: 11,
-    color: '#94A3B8',
-  },
-
-  viewButton: {
-    backgroundColor: '#EFF6FF',
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 8,
-  },
-
-  viewButtonText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#2563EB',
-  },
-
-  menuButton: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    minHeight: 68,
-    paddingHorizontal: 14,
+  profileButton: {
+    marginTop: 15,
+    backgroundColor: colors.lightBlue,
+    borderRadius: radius.md,
+    paddingVertical: 11,
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 10,
-  },
-
-  menuIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#EFF6FF',
-    alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
   },
 
-  menuIconText: {
+  profileButtonText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: colors.blue,
+  },
+
+  arrow: {
     fontSize: 17,
     fontWeight: '800',
-    color: '#2563EB',
+    color: colors.blue,
+    marginLeft: 7,
   },
 
-  menuInfo: {
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: colors.navy,
+    marginTop: 23,
+    marginBottom: 11,
+  },
+
+  statsRow: {
+    flexDirection: 'row',
+    gap: 9,
+  },
+
+  statCard: {
+    flex: 1,
+    backgroundColor: colors.white,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+
+  statNumber: {
+    fontSize: 19,
+    fontWeight: '900',
+    color: colors.navy,
+  },
+
+  statLabel: {
+    fontSize: 9,
+    color: colors.textSecondary,
+    marginTop: 4,
+  },
+
+  subjectCard: {
+    backgroundColor: colors.white,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.lg,
+  },
+
+  subjects: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 7,
+  },
+
+  subjectChip: {
+    backgroundColor: colors.lightBlue,
+    borderRadius: radius.round,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: 11,
+    paddingVertical: 7,
+  },
+
+  subjectText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.blue,
+  },
+
+  emptyText: {
+    fontSize: 10,
+    lineHeight: 15,
+    color: colors.textMuted,
+  },
+
+  infoCard: {
+    backgroundColor: colors.white,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.lg,
+  },
+
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 13,
+  },
+
+  infoIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: colors.lightTeal,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 11,
+  },
+
+  infoIconText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: colors.blue,
+  },
+
+  infoContent: {
     flex: 1,
   },
 
-  menuTitle: {
-    fontSize: 14,
+  infoLabel: {
+    fontSize: 9,
+    color: colors.textMuted,
+    fontWeight: '600',
+  },
+
+  infoValue: {
+    fontSize: 12,
+    color: colors.navy,
     fontWeight: '700',
-    color: '#0F172A',
-    marginBottom: 3,
+    marginTop: 2,
   },
 
-  menuSubtitle: {
+  divider: {
+    height: 1,
+    backgroundColor: colors.border,
+  },
+
+  actionsCard: {
+    backgroundColor: colors.white,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.lg,
+  },
+
+  actionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+  },
+
+  actionIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.lightBlue,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 11,
+  },
+
+  actionIconText: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: colors.blue,
+  },
+
+  actionContent: {
+    flex: 1,
+  },
+
+  actionTitle: {
     fontSize: 11,
-    color: '#64748B',
+    fontWeight: '800',
+    color: colors.navy,
   },
 
-  menuArrow: {
-    fontSize: 27,
-    color: '#94A3B8',
+  actionSubtitle: {
+    fontSize: 9,
+    lineHeight: 14,
+    color: colors.textSecondary,
+    marginTop: 3,
+  },
+
+  actionArrow: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.textMuted,
     marginLeft: 8,
   },
 
-  noteCard: {
-    backgroundColor: '#EFF6FF',
-    borderRadius: 14,
-    padding: 16,
-    marginTop: 12,
+  logoutButton: {
+    marginTop: 22,
+    borderWidth: 1,
+    borderColor: colors.error,
+    borderRadius: radius.lg,
+    paddingVertical: 13,
+    alignItems: 'center',
   },
 
-  noteTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#1E40AF',
-    marginBottom: 5,
-  },
-
-  noteText: {
+  logoutText: {
     fontSize: 12,
-    lineHeight: 19,
-    color: '#475569',
+    fontWeight: '800',
+    color: colors.error,
+  },
+
+  footer: {
+    fontSize: 9,
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginTop: 18,
   },
 
   bottomSpace: {
-    height: 20,
+    height: 15,
   },
 });

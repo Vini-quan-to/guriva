@@ -1,6 +1,9 @@
+import { useAuth } from '../context/AuthContext';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -9,163 +12,276 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors, radius, spacing } from '../theme';
 
 export default function TutorOnboardingScreen() {
-  const [selectedMode, setSelectedMode] = useState('Online');
+  const { updateTutorProfile } = useAuth();
+
+  const [subjects, setSubjects] = useState('');
+  const [experience, setExperience] = useState('');
+  const [qualification, setQualification] = useState('');
+  const [bio, setBio] = useState('');
+
+  const [mode, setMode] = useState<
+    'Online' | 'Offline' | 'Both'
+  >('Both');
+
+  const [error, setError] = useState('');
+
+  const handleContinue = () => {
+    setError('');
+
+    if (!subjects.trim()) {
+      setError('Please enter at least one subject.');
+      return;
+    }
+
+    if (!experience.trim()) {
+      setError('Please enter your teaching experience.');
+      return;
+    }
+
+    if (!qualification.trim()) {
+      setError('Please enter your qualification.');
+      return;
+    }
+
+    if (!bio.trim()) {
+      setError(
+        'Please add a short introduction about yourself.'
+      );
+      return;
+    }
+
+    updateTutorProfile({
+      subjects: subjects.trim(),
+      experience: experience.trim(),
+      qualification: qualification.trim(),
+      mode,
+      bio: bio.trim(),
+    });
+
+    router.push('/tutor-profile-preview');
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        style={styles.keyboard}
+        behavior={
+          Platform.OS === 'ios'
+            ? 'padding'
+            : undefined
+        }
       >
-        {/* Header */}
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.backText}>‹</Text>
-          <Text style={styles.backLabel}>Back</Text>
-        </TouchableOpacity>
+          <View style={styles.header}>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={styles.backButton}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.back}>‹</Text>
+            </TouchableOpacity>
 
-        <View style={styles.header}>
-          <Text style={styles.logo}>Guriva</Text>
+            <Text style={styles.headerTitle}>
+              Tutor Profile
+            </Text>
 
-          <Text style={styles.title}>Create your tutor profile</Text>
-
-          <Text style={styles.subtitle}>
-            Help students understand who you are and what you teach.
-          </Text>
-        </View>
-
-        {/* Profile Photo */}
-        <Text style={styles.sectionTitle}>Profile photo</Text>
-
-        <TouchableOpacity style={styles.photoContainer}>
-          <View style={styles.photoCircle}>
-            <Text style={styles.photoText}>+</Text>
+            <View style={styles.headerSpace} />
           </View>
 
-          <Text style={styles.photoLabel}>Add profile photo</Text>
-        </TouchableOpacity>
+          <View style={styles.progressSection}>
+            <View style={styles.progressTop}>
+              <Text style={styles.progressLabel}>
+                Profile setup
+              </Text>
 
-        {/* Basic Information */}
-        <Text style={styles.sectionTitle}>Basic information</Text>
+              <Text style={styles.progressValue}>
+                1 of 2
+              </Text>
+            </View>
 
-        <Text style={styles.label}>Full name</Text>
+            <View style={styles.progressTrack}>
+              <View style={styles.progressFill} />
+            </View>
+          </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your full name"
-          placeholderTextColor="#94A3B8"
-        />
+          <View style={styles.intro}>
+            <View style={styles.iconCircle}>
+              <Text style={styles.iconText}>T</Text>
+            </View>
 
-        <Text style={styles.label}>Subject</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="e.g. Mathematics"
-          placeholderTextColor="#94A3B8"
-        />
-
-        <Text style={styles.label}>Classes you teach</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="e.g. Class 9 - 12"
-          placeholderTextColor="#94A3B8"
-        />
-
-        <Text style={styles.label}>Years of experience</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="e.g. 5 years"
-          placeholderTextColor="#94A3B8"
-        />
-
-        {/* Qualification */}
-        <Text style={styles.sectionTitle}>Qualification</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="e.g. B.Sc. Mathematics"
-          placeholderTextColor="#94A3B8"
-        />
-
-        {/* About */}
-        <Text style={styles.sectionTitle}>About you</Text>
-
-        <TextInput
-          style={styles.aboutInput}
-          placeholder="Tell students about your teaching experience..."
-          placeholderTextColor="#94A3B8"
-          multiline
-          textAlignVertical="top"
-        />
-
-        {/* Teaching Mode */}
-        <Text style={styles.sectionTitle}>Teaching mode</Text>
-
-        <View style={styles.modeContainer}>
-          <TouchableOpacity
-            style={[
-              styles.modeButton,
-              selectedMode === 'Online' && styles.modeButtonSelected,
-            ]}
-            onPress={() => setSelectedMode('Online')}
-          >
-            <Text
-              style={[
-                styles.modeText,
-                selectedMode === 'Online' && styles.modeTextSelected,
-              ]}
-            >
-              Online
+            <Text style={styles.title}>
+              Tell students about yourself
             </Text>
-          </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[
-              styles.modeButton,
-              selectedMode === 'Home Tuition' &&
-                styles.modeButtonSelected,
-            ]}
-            onPress={() => setSelectedMode('Home Tuition')}
-          >
-            <Text
-              style={[
-                styles.modeText,
-                selectedMode === 'Home Tuition' &&
-                  styles.modeTextSelected,
-              ]}
-            >
-              Home Tuition
+            <Text style={styles.subtitle}>
+              Add a few details so students can understand
+              your teaching experience and expertise.
             </Text>
-          </TouchableOpacity>
-        </View>
+          </View>
 
-        {/* Location */}
-        <Text style={styles.sectionTitle}>Location</Text>
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>
+              Teaching details
+            </Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your city / area"
-          placeholderTextColor="#94A3B8"
-        />
+            <Text style={styles.label}>
+              Subjects
+            </Text>
 
-        {/* Continue */}
-        <TouchableOpacity
-          style={styles.continueButton}
-          onPress={() => router.push('/tutor-profile-preview')}
-        >
-          <Text style={styles.continueButtonText}>
-            Save & Continue
+            <TextInput
+              style={styles.input}
+              placeholder="e.g. Mathematics, Physics"
+              placeholderTextColor={colors.textMuted}
+              value={subjects}
+              onChangeText={(text) => {
+                setSubjects(text);
+                setError('');
+              }}
+            />
+
+            <Text style={styles.helperText}>
+              Separate multiple subjects with commas.
+            </Text>
+
+            <Text style={styles.label}>
+              Teaching Experience
+            </Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="e.g. 3 years"
+              placeholderTextColor={colors.textMuted}
+              value={experience}
+              onChangeText={(text) => {
+                setExperience(text);
+                setError('');
+              }}
+            />
+
+            <Text style={styles.label}>
+              Highest Qualification
+            </Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="e.g. M.Sc. Mathematics"
+              placeholderTextColor={colors.textMuted}
+              value={qualification}
+              onChangeText={(text) => {
+                setQualification(text);
+                setError('');
+              }}
+            />
+
+            <Text style={styles.label}>
+              Teaching Mode
+            </Text>
+
+            <View style={styles.modeRow}>
+              {(
+                ['Online', 'Offline', 'Both'] as const
+              ).map((item) => (
+                <TouchableOpacity
+                  key={item}
+                  style={[
+                    styles.modeButton,
+                    mode === item &&
+                      styles.modeButtonActive,
+                  ]}
+                  onPress={() => setMode(item)}
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    style={[
+                      styles.modeText,
+                      mode === item &&
+                        styles.modeTextActive,
+                    ]}
+                  >
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={styles.label}>
+              About You
+            </Text>
+
+            <TextInput
+              style={styles.bioInput}
+              placeholder="Tell students briefly about your teaching style, experience and what you can help them achieve."
+              placeholderTextColor={colors.textMuted}
+              value={bio}
+              onChangeText={(text) => {
+                setBio(text);
+                setError('');
+              }}
+              multiline
+              textAlignVertical="top"
+            />
+
+            <Text style={styles.helperText}>
+              Keep it clear and student-friendly.
+            </Text>
+
+            {error ? (
+              <View style={styles.errorBox}>
+                <Text style={styles.errorText}>
+                  {error}
+                </Text>
+              </View>
+            ) : null}
+
+            <TouchableOpacity
+              style={styles.continueButton}
+              onPress={handleContinue}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.continueText}>
+                Continue
+              </Text>
+
+              <Text style={styles.arrow}>
+                →
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.noteCard}>
+            <View style={styles.noteIcon}>
+              <Text style={styles.noteIconText}>
+                i
+              </Text>
+            </View>
+
+            <View style={styles.noteContent}>
+              <Text style={styles.noteTitle}>
+                Verification comes next
+              </Text>
+
+              <Text style={styles.noteText}>
+                Your profile can later include qualification
+                documents and identity verification.
+              </Text>
+            </View>
+          </View>
+
+          <Text style={styles.footer}>
+            You can update your tutor profile later from
+            your account.
           </Text>
-        </TouchableOpacity>
 
-        <View style={styles.bottomSpace} />
-      </ScrollView>
+          <View style={styles.bottomSpace} />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -173,173 +289,304 @@ export default function TutorOnboardingScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
+  },
+
+  keyboard: {
+    flex: 1,
   },
 
   container: {
-    paddingHorizontal: 24,
-    paddingBottom: 20,
-  },
-
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    width: 80,
-  },
-
-  backText: {
-    fontSize: 34,
-    color: '#0F172A',
-    lineHeight: 34,
-  },
-
-  backLabel: {
-    fontSize: 15,
-    color: '#475569',
-    marginLeft: 4,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.md,
+    paddingBottom: 30,
   },
 
   header: {
-    marginTop: 22,
-    marginBottom: 25,
+    height: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
 
-  logo: {
-    fontSize: 28,
+  backButton: {
+    width: 38,
+    height: 38,
+    justifyContent: 'center',
+  },
+
+  back: {
+    fontSize: 36,
+    lineHeight: 38,
+    color: colors.navy,
+  },
+
+  headerTitle: {
+    fontSize: 15,
     fontWeight: '800',
-    color: '#2563EB',
-    marginBottom: 18,
+    color: colors.navy,
+  },
+
+  headerSpace: {
+    width: 38,
+  },
+
+  progressSection: {
+    marginTop: 13,
+  },
+
+  progressTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 7,
+  },
+
+  progressLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.textSecondary,
+  },
+
+  progressValue: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: colors.blue,
+  },
+
+  progressTrack: {
+    height: 5,
+    backgroundColor: colors.border,
+    borderRadius: 5,
+    overflow: 'hidden',
+  },
+
+  progressFill: {
+    width: '50%',
+    height: '100%',
+    backgroundColor: colors.teal,
+    borderRadius: 5,
+  },
+
+  intro: {
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 21,
+  },
+
+  iconCircle: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: colors.lightTeal,
+    borderWidth: 2,
+    borderColor: colors.teal,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 11,
+  },
+
+  iconText: {
+    fontSize: 21,
+    fontWeight: '900',
+    color: colors.navy,
   },
 
   title: {
-    fontSize: 27,
+    fontSize: 22,
     fontWeight: '800',
-    color: '#0F172A',
-    marginBottom: 8,
+    color: colors.navy,
+    textAlign: 'center',
   },
 
   subtitle: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: '#64748B',
+    fontSize: 12,
+    lineHeight: 18,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginTop: 7,
+    paddingHorizontal: 7,
+  },
+
+  card: {
+    backgroundColor: colors.white,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.lg,
   },
 
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginTop: 22,
-    marginBottom: 14,
-  },
-
-  photoContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    borderRadius: 16,
-    paddingVertical: 20,
-  },
-
-  photoCircle: {
-    width: 78,
-    height: 78,
-    borderRadius: 39,
-    backgroundColor: '#DBEAFE',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
-
-  photoText: {
-    fontSize: 32,
-    fontWeight: '400',
-    color: '#2563EB',
-  },
-
-  photoLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#2563EB',
+    fontSize: 15,
+    fontWeight: '800',
+    color: colors.navy,
+    marginBottom: 17,
   },
 
   label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#334155',
-    marginBottom: 8,
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.navy,
+    marginBottom: 7,
   },
 
   input: {
-    height: 52,
+    height: 48,
+    backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    fontSize: 15,
-    color: '#0F172A',
-    marginBottom: 16,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: 13,
+    fontSize: 13,
+    color: colors.navy,
+    marginBottom: 5,
   },
 
-  aboutInput: {
-    height: 100,
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingTop: 14,
-    fontSize: 15,
-    color: '#0F172A',
+  helperText: {
+    fontSize: 9,
+    color: colors.textMuted,
+    marginBottom: 15,
   },
 
-  modeContainer: {
+  modeRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
+    marginBottom: 17,
   },
 
   modeButton: {
     flex: 1,
-    height: 48,
-    borderRadius: 12,
+    height: 42,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: colors.border,
+    backgroundColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  modeButtonSelected: {
-    backgroundColor: '#EFF6FF',
-    borderColor: '#2563EB',
+  modeButtonActive: {
+    backgroundColor: colors.lightTeal,
+    borderColor: colors.teal,
   },
 
   modeText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#64748B',
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.textSecondary,
   },
 
-  modeTextSelected: {
-    color: '#2563EB',
+  modeTextActive: {
+    color: colors.navy,
+  },
+
+  bioInput: {
+    minHeight: 105,
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: 13,
+    paddingVertical: 12,
+    fontSize: 12,
+    lineHeight: 18,
+    color: colors.navy,
+    marginBottom: 5,
+  },
+
+  errorBox: {
+    backgroundColor: colors.errorLight,
+    borderWidth: 1,
+    borderColor: colors.error,
+    borderRadius: radius.md,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    marginTop: 4,
+    marginBottom: 15,
+  },
+
+  errorText: {
+    fontSize: 10,
+    lineHeight: 15,
+    color: colors.error,
+    fontWeight: '600',
   },
 
   continueButton: {
-    height: 54,
-    borderRadius: 12,
-    backgroundColor: '#2563EB',
+    backgroundColor: colors.teal,
+    borderRadius: radius.lg,
+    paddingVertical: 16,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 30,
+    marginTop: 4,
   },
 
-  continueButtonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
+  continueText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: colors.navy,
+  },
+
+  arrow: {
+    fontSize: 20,
     fontWeight: '700',
+    color: colors.navy,
+    marginLeft: 9,
+  },
+
+  noteCard: {
+    backgroundColor: colors.lightBlue,
+    borderRadius: radius.xl,
+    padding: spacing.lg,
+    marginTop: 20,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+
+  noteIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+
+  noteIconText: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: colors.blue,
+  },
+
+  noteContent: {
+    flex: 1,
+  },
+
+  noteTitle: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: colors.navy,
+  },
+
+  noteText: {
+    fontSize: 9,
+    lineHeight: 14,
+    color: colors.textSecondary,
+    marginTop: 3,
+  },
+
+  footer: {
+    fontSize: 9,
+    lineHeight: 14,
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginTop: 18,
+    paddingHorizontal: 15,
   },
 
   bottomSpace: {
-    height: 30,
+    height: 15,
   },
 });

@@ -1,5 +1,7 @@
 import { router } from 'expo-router';
+import { useMemo } from 'react';
 import {
+  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -8,252 +10,432 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useAuth } from '../context/AuthContext';
+import { useMarketplace } from '../context/MarketplaceContext';
+import {
+  colors,
+  radius,
+  spacing,
+} from '../theme';
+
 export default function StudentDashboardScreen() {
+  const { user } = useAuth();
+
+  const {
+    bookings,
+    enquiries,
+    isLoading,
+  } = useMarketplace();
+
+  const studentBookings = useMemo(() => {
+    if (!user?.email) {
+      return [];
+    }
+
+    return bookings.filter(
+      (booking) =>
+        booking.studentEmail.toLowerCase() ===
+        user.email.toLowerCase()
+    );
+  }, [bookings, user?.email]);
+
+  const studentEnquiries = useMemo(() => {
+    if (!user?.email) {
+      return [];
+    }
+
+    return enquiries.filter(
+      (enquiry) =>
+        enquiry.studentEmail.toLowerCase() ===
+        user.email.toLowerCase()
+    );
+  }, [enquiries, user?.email]);
+
+  const upcomingBookings = studentBookings.filter(
+    (booking) =>
+      booking.status === 'confirmed' ||
+      booking.status === 'pending'
+  );
+
+  const latestBooking =
+    upcomingBookings[0] || studentBookings[0];
+
+  const confirmedCount =
+    studentBookings.filter(
+      (booking) =>
+        booking.status === 'confirmed'
+    ).length;
+
+  const pendingEnquiryCount =
+    studentEnquiries.filter(
+      (enquiry) =>
+        enquiry.status === 'pending'
+    ).length;
+
+  const initials =
+    user?.name
+      ?.split(' ')
+      .map((part) => part[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase() || 'S';
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator
+            size="small"
+            color={colors.teal}
+          />
+
+          <Text style={styles.loadingText}>
+            Loading your dashboard...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
+        {/* HEADER */}
+
         <View style={styles.header}>
           <View>
-            <Text style={styles.greeting}>My learning</Text>
-            <Text style={styles.title}>Dashboard</Text>
+            <Text style={styles.greeting}>
+              Hello, {user?.name || 'Student'} 👋
+            </Text>
+
+            <Text style={styles.subtitle}>
+              Continue your learning journey
+            </Text>
           </View>
 
           <TouchableOpacity
-            style={styles.profileButton}
+            style={styles.avatar}
+            onPress={() =>
+              router.push('/student-profile')
+            }
+            activeOpacity={0.8}
           >
-            <Text style={styles.profileText}>V</Text>
+            <Text style={styles.avatarText}>
+              {initials}
+            </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Current tutor */}
-        <Text style={styles.sectionTitle}>
-          Current tutor
-        </Text>
+        {/* FIND TUTOR */}
 
         <TouchableOpacity
-          style={styles.tutorCard}
-          onPress={() => router.push('/tutor-profile')}
+          style={styles.findTutorCard}
+          onPress={() =>
+            router.push('/find-tutor')
+          }
+          activeOpacity={0.9}
         >
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>A</Text>
+          <View style={styles.findTutorContent}>
+            <Text style={styles.findTutorTitle}>
+              Find the right tutor
+            </Text>
+
+            <Text style={styles.findTutorText}>
+              Explore tutors, compare profiles,
+              and book your next class.
+            </Text>
+
+            <View style={styles.findTutorButton}>
+              <Text style={styles.findTutorButtonText}>
+                Find a Tutor
+              </Text>
+            </View>
           </View>
 
-          <View style={styles.tutorInfo}>
-            <Text style={styles.tutorName}>
-              Aarav Sharma
-            </Text>
-
-            <Text style={styles.tutorSubject}>
-              Mathematics
-            </Text>
-
-            <Text style={styles.tutorMode}>
-              Online • ₹500/hour
-            </Text>
-          </View>
-
-          <Text style={styles.arrow}>›</Text>
+          <Text style={styles.findTutorIcon}>
+            →
+          </Text>
         </TouchableOpacity>
 
-        {/* Upcoming class */}
-        <Text style={styles.sectionTitle}>
-          Upcoming class
-        </Text>
+        {/* STATS */}
 
-        <View style={styles.classCard}>
-          <View style={styles.dateBox}>
-            <Text style={styles.dateDay}>12</Text>
-            <Text style={styles.dateMonth}>OCT</Text>
-          </View>
-
-          <View style={styles.classInfo}>
-            <Text style={styles.classTitle}>
-              Mathematics
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              {studentBookings.length}
             </Text>
 
-            <Text style={styles.classTutor}>
-              with Aarav Sharma
-            </Text>
-
-            <Text style={styles.classTime}>
-              5:00 PM • Online
-            </Text>
-          </View>
-        </View>
-
-        {/* Booking status */}
-        <Text style={styles.sectionTitle}>
-          Booking status
-        </Text>
-
-        <View style={styles.statusCard}>
-          <View style={styles.statusIcon}>
-            <Text style={styles.statusIconText}>✓</Text>
-          </View>
-
-          <View style={styles.statusInfo}>
-            <Text style={styles.statusTitle}>
-              Booking confirmed
-            </Text>
-
-            <Text style={styles.statusText}>
-              Your next class is scheduled.
+            <Text style={styles.statLabel}>
+              Bookings
             </Text>
           </View>
 
-          <View style={styles.confirmedBadge}>
-            <Text style={styles.confirmedText}>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              {confirmedCount}
+            </Text>
+
+            <Text style={styles.statLabel}>
               Confirmed
             </Text>
           </View>
+
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              {pendingEnquiryCount}
+            </Text>
+
+            <Text style={styles.statLabel}>
+              Enquiries
+            </Text>
+          </View>
         </View>
 
-        {/* Quick actions */}
+        {/* UPCOMING CLASS */}
+
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>
+            Upcoming Class
+          </Text>
+
+          {studentBookings.length > 0 ? (
+            <TouchableOpacity
+              onPress={() =>
+                router.push('/student-history')
+              }
+            >
+              <Text style={styles.seeAll}>
+                View all
+              </Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
+
+        {latestBooking ? (
+          <View style={styles.bookingCard}>
+            <View style={styles.bookingTop}>
+              <View style={styles.bookingAvatar}>
+                <Text style={styles.bookingAvatarText}>
+                  {latestBooking.tutorName
+                    .split(' ')
+                    .map((name) => name[0])
+                    .join('')
+                    .slice(0, 2)
+                    .toUpperCase()}
+                </Text>
+              </View>
+
+              <View style={styles.bookingInfo}>
+                <Text style={styles.tutorName}>
+                  {latestBooking.tutorName}
+                </Text>
+
+                <Text style={styles.subject}>
+                  {latestBooking.subject}
+                </Text>
+              </View>
+
+              <View
+                style={[
+                  styles.statusBadge,
+                  latestBooking.status ===
+                    'confirmed'
+                    ? styles.confirmedBadge
+                    : styles.pendingBadge,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.statusText,
+                    latestBooking.status ===
+                      'confirmed'
+                      ? styles.confirmedText
+                      : styles.pendingText,
+                  ]}
+                >
+                  {latestBooking.status}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.divider} />
+
+            <View style={styles.bookingDetails}>
+              <View style={styles.detail}>
+                <Text style={styles.detailLabel}>
+                  Date
+                </Text>
+
+                <Text style={styles.detailValue}>
+                  {latestBooking.date}
+                </Text>
+              </View>
+
+              <View style={styles.detail}>
+                <Text style={styles.detailLabel}>
+                  Time
+                </Text>
+
+                <Text style={styles.detailValue}>
+                  {latestBooking.time}
+                </Text>
+              </View>
+
+              <View style={styles.detail}>
+                <Text style={styles.detailLabel}>
+                  Mode
+                </Text>
+
+                <Text style={styles.detailValue}>
+                  {latestBooking.mode}
+                </Text>
+              </View>
+            </View>
+          </View>
+        ) : (
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyIcon}>
+              📚
+            </Text>
+
+            <Text style={styles.emptyTitle}>
+              No classes booked yet
+            </Text>
+
+            <Text style={styles.emptyText}>
+              Find a tutor and book your first class
+              to start learning.
+            </Text>
+
+            <TouchableOpacity
+              style={styles.emptyButton}
+              onPress={() =>
+                router.push('/find-tutor')
+              }
+            >
+              <Text style={styles.emptyButtonText}>
+                Find a Tutor
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* QUICK ACTIONS */}
+
         <Text style={styles.sectionTitle}>
-          Quick actions
+          Quick Actions
         </Text>
 
-        <View style={styles.actionsRow}>
-          {/* Find tutor */}
+        <View style={styles.actionsGrid}>
           <TouchableOpacity
             style={styles.actionCard}
-            onPress={() => router.push('/find-tutor')}
+            onPress={() =>
+              router.push('/find-tutor')
+            }
+            activeOpacity={0.8}
           >
-            <View style={styles.actionIcon}>
-              <Text style={styles.actionIconText}>+</Text>
-            </View>
+            <Text style={styles.actionIcon}>
+              🔎
+            </Text>
+
+            <Text style={styles.actionTitle}>
+              Find Tutor
+            </Text>
 
             <Text style={styles.actionText}>
-              Find tutor
+              Browse tutors
             </Text>
           </TouchableOpacity>
 
-          {/* Reviews */}
           <TouchableOpacity
             style={styles.actionCard}
-            onPress={() => router.push('/student-history')}
+            onPress={() =>
+              router.push('/student-enquiries')
+            }
+            activeOpacity={0.8}
           >
-            <View style={styles.actionIcon}>
-              <Text style={styles.actionIconText}>★</Text>
-            </View>
+            <Text style={styles.actionIcon}>
+              💬
+            </Text>
+
+            <Text style={styles.actionTitle}>
+              Enquiries
+            </Text>
 
             <Text style={styles.actionText}>
-              Reviews
+              Track your requests
             </Text>
           </TouchableOpacity>
 
-          {/* History */}
           <TouchableOpacity
             style={styles.actionCard}
-            onPress={() => router.push('/student-history')}
+            onPress={() =>
+              router.push('/student-history')
+            }
+            activeOpacity={0.8}
           >
-            <View style={styles.actionIcon}>
-              <Text style={styles.actionIconText}>◷</Text>
-            </View>
+            <Text style={styles.actionIcon}>
+              📋
+            </Text>
 
-            <Text style={styles.actionText}>
+            <Text style={styles.actionTitle}>
               History
             </Text>
+
+            <Text style={styles.actionText}>
+              View past classes
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() =>
+              router.push('/notifications')
+            }
+            activeOpacity={0.8}
+          >
+            <Text style={styles.actionIcon}>
+              🔔
+            </Text>
+
+            <Text style={styles.actionTitle}>
+              Notifications
+            </Text>
+
+            <Text style={styles.actionText}>
+              Stay updated
+            </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Enquiries */}
-        <Text style={styles.sectionTitle}>
-          My enquiries
-        </Text>
+        {/* PROFILE */}
 
         <TouchableOpacity
-          style={styles.enquiryCard}
-          onPress={() => router.push('/student-enquiries')}
+          style={styles.profileLink}
+          onPress={() =>
+            router.push('/student-profile')
+          }
+          activeOpacity={0.75}
         >
-          <View style={styles.enquiryIcon}>
-            <Text style={styles.enquiryIconText}>?</Text>
-          </View>
-
-          <View style={styles.enquiryInfo}>
-            <Text style={styles.enquiryTitle}>
-              Tutor enquiries
+          <View>
+            <Text style={styles.profileTitle}>
+              Complete your learning profile
             </Text>
 
-            <Text style={styles.enquiryText}>
-              Track your tutor requests and responses.
+            <Text style={styles.profileText}>
+              Add your class, city, school and
+              learning goals to help tutors
+              understand you better.
             </Text>
           </View>
 
-          <Text style={styles.arrow}>›</Text>
+          <Text style={styles.profileArrow}>
+            →
+          </Text>
         </TouchableOpacity>
-
-        {/* Recent activity */}
-        <Text style={styles.sectionTitle}>
-          Recent activity
-        </Text>
-
-        <View style={styles.activityCard}>
-          <View style={styles.activityItem}>
-            <View style={styles.activityDot} />
-
-            <View style={styles.activityInfo}>
-              <Text style={styles.activityTitle}>
-                Booking confirmed
-              </Text>
-
-              <Text style={styles.activityText}>
-                Mathematics with Aarav Sharma
-              </Text>
-            </View>
-
-            <Text style={styles.activityTime}>
-              Today
-            </Text>
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.activityItem}>
-            <View style={styles.activityDot} />
-
-            <View style={styles.activityInfo}>
-              <Text style={styles.activityTitle}>
-                Payment completed
-              </Text>
-
-              <Text style={styles.activityText}>
-                ₹500 paid successfully
-              </Text>
-            </View>
-
-            <Text style={styles.activityTime}>
-              Today
-            </Text>
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.activityItem}>
-            <View style={styles.activityDot} />
-
-            <View style={styles.activityInfo}>
-              <Text style={styles.activityTitle}>
-                Tutor enquiry sent
-              </Text>
-
-              <Text style={styles.activityText}>
-                Physics with Riya Mehta
-              </Text>
-            </View>
-
-            <Text style={styles.activityTime}>
-              Yesterday
-            </Text>
-          </View>
-        </View>
-
-        {/* Bottom spacing */}
-        <View style={styles.bottomSpace} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -262,352 +444,361 @@ export default function StudentDashboardScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
 
   container: {
-    paddingHorizontal: 20,
-    paddingTop: 15,
-    paddingBottom: 30,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.lg,
+    paddingBottom: 35,
+  },
+
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  loadingText: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 10,
   },
 
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 25,
+    justifyContent: 'space-between',
+    marginBottom: spacing.xl,
   },
 
   greeting: {
-    fontSize: 14,
-    color: '#64748B',
-    marginBottom: 4,
+    fontSize: 22,
+    fontWeight: '900',
+    color: colors.navy,
   },
 
-  title: {
-    fontSize: 27,
-    fontWeight: '800',
-    color: '#0F172A',
-  },
-
-  profileButton: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: '#DBEAFE',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  profileText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#2563EB',
-  },
-
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginBottom: 12,
-    marginTop: 8,
-  },
-
-  tutorCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 20,
+  subtitle: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 5,
   },
 
   avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: '#DBEAFE',
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: colors.teal,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
   },
 
   avatarText: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#2563EB',
+    fontSize: 15,
+    fontWeight: '900',
+    color: colors.navy,
   },
 
-  tutorInfo: {
+  findTutorCard: {
+    backgroundColor: colors.navy,
+    borderRadius: radius.xl,
+    padding: spacing.xl,
+    minHeight: 155,
+    flexDirection: 'row',
+    marginBottom: spacing.lg,
+  },
+
+  findTutorContent: {
+    flex: 1,
+  },
+
+  findTutorTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: colors.white,
+  },
+
+  findTutorText: {
+    fontSize: 11,
+    lineHeight: 17,
+    color: '#C9D8E5',
+    marginTop: 6,
+    maxWidth: 250,
+  },
+
+  findTutorButton: {
+    alignSelf: 'flex-start',
+    backgroundColor: colors.teal,
+    borderRadius: radius.md,
+    paddingHorizontal: 15,
+    paddingVertical: 9,
+    marginTop: 14,
+  },
+
+  findTutorButtonText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: colors.navy,
+  },
+
+  findTutorIcon: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: colors.teal,
+    alignSelf: 'center',
+  },
+
+  statsRow: {
+    flexDirection: 'row',
+    gap: 9,
+    marginBottom: spacing.xl,
+  },
+
+  statCard: {
+    flex: 1,
+    backgroundColor: colors.white,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: 15,
+    alignItems: 'center',
+  },
+
+  statNumber: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: colors.navy,
+  },
+
+  statLabel: {
+    fontSize: 10,
+    color: colors.textSecondary,
+    marginTop: 3,
+  },
+
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: colors.navy,
+    marginBottom: 10,
+  },
+
+  seeAll: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.blue,
+  },
+
+  bookingCard: {
+    backgroundColor: colors.white,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.lg,
+    marginBottom: spacing.xl,
+  },
+
+  bookingTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  bookingAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.lightTeal,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 11,
+  },
+
+  bookingAvatarText: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: colors.navy,
+  },
+
+  bookingInfo: {
     flex: 1,
   },
 
   tutorName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginBottom: 4,
-  },
-
-  tutorSubject: {
     fontSize: 14,
-    color: '#475569',
-    marginBottom: 3,
-  },
-
-  tutorMode: {
-    fontSize: 12,
-    color: '#94A3B8',
-  },
-
-  arrow: {
-    fontSize: 28,
-    color: '#94A3B8',
-  },
-
-  classCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 20,
-  },
-
-  dateBox: {
-    width: 58,
-    height: 58,
-    borderRadius: 14,
-    backgroundColor: '#EFF6FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 14,
-  },
-
-  dateDay: {
-    fontSize: 20,
     fontWeight: '800',
-    color: '#2563EB',
+    color: colors.navy,
   },
 
-  dateMonth: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#64748B',
+  subject: {
+    fontSize: 11,
+    color: colors.textSecondary,
+    marginTop: 3,
   },
 
-  classInfo: {
-    flex: 1,
-  },
-
-  classTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginBottom: 4,
-  },
-
-  classTutor: {
-    fontSize: 13,
-    color: '#475569',
-    marginBottom: 3,
-  },
-
-  classTime: {
-    fontSize: 12,
-    color: '#94A3B8',
-  },
-
-  statusCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 20,
-  },
-
-  statusIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: '#DCFCE7',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-
-  statusIconText: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#16A34A',
-  },
-
-  statusInfo: {
-    flex: 1,
-  },
-
-  statusTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginBottom: 3,
-  },
-
-  statusText: {
-    fontSize: 12,
-    color: '#64748B',
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: radius.round,
   },
 
   confirmedBadge: {
-    backgroundColor: '#DCFCE7',
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 5,
+    backgroundColor: colors.successLight,
+  },
+
+  pendingBadge: {
+    backgroundColor: colors.warningLight,
+  },
+
+  statusText: {
+    fontSize: 9,
+    fontWeight: '800',
+    textTransform: 'capitalize',
   },
 
   confirmedText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#16A34A',
+    color: colors.success,
   },
 
-  actionsRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 20,
-  },
-
-  actionCard: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-
-  actionIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#EFF6FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 7,
-  },
-
-  actionIconText: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#2563EB',
-  },
-
-  actionText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#334155',
-  },
-
-  enquiryCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 20,
-  },
-
-  enquiryIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#EFF6FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-
-  enquiryIconText: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#2563EB',
-  },
-
-  enquiryInfo: {
-    flex: 1,
-  },
-
-  enquiryTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginBottom: 4,
-  },
-
-  enquiryText: {
-    fontSize: 12,
-    color: '#64748B',
-  },
-
-  activityCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-
-  activityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  activityDot: {
-    width: 9,
-    height: 9,
-    borderRadius: 5,
-    backgroundColor: '#2563EB',
-    marginRight: 12,
-  },
-
-  activityInfo: {
-    flex: 1,
-  },
-
-  activityTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginBottom: 3,
-  },
-
-  activityText: {
-    fontSize: 12,
-    color: '#64748B',
-  },
-
-  activityTime: {
-    fontSize: 11,
-    color: '#94A3B8',
+  pendingText: {
+    color: colors.warning,
   },
 
   divider: {
     height: 1,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: colors.border,
     marginVertical: 14,
   },
 
-  bottomSpace: {
-    height: 30,
+  bookingDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
+  detail: {
+    flex: 1,
+  },
+
+  detailLabel: {
+    fontSize: 9,
+    color: colors.textMuted,
+    marginBottom: 3,
+  },
+
+  detailValue: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.navy,
+  },
+
+  emptyCard: {
+    backgroundColor: colors.white,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.xl,
+    alignItems: 'center',
+    marginBottom: spacing.xl,
+  },
+
+  emptyIcon: {
+    fontSize: 30,
+  },
+
+  emptyTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: colors.navy,
+    marginTop: 8,
+  },
+
+  emptyText: {
+    fontSize: 11,
+    lineHeight: 17,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginTop: 5,
+    maxWidth: 270,
+  },
+
+  emptyButton: {
+    backgroundColor: colors.teal,
+    borderRadius: radius.md,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    marginTop: 14,
+  },
+
+  emptyButtonText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: colors.navy,
+  },
+
+  actionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: spacing.xl,
+  },
+
+  actionCard: {
+    width: '48%',
+    backgroundColor: colors.white,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.lg,
+  },
+
+  actionIcon: {
+    fontSize: 22,
+    marginBottom: 9,
+  },
+
+  actionTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: colors.navy,
+  },
+
+  actionText: {
+    fontSize: 10,
+    color: colors.textSecondary,
+    marginTop: 3,
+  },
+
+  profileLink: {
+    backgroundColor: colors.lightBlue,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  profileTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: colors.navy,
+  },
+
+  profileText: {
+    fontSize: 10,
+    lineHeight: 15,
+    color: colors.textSecondary,
+    marginTop: 4,
+    maxWidth: 280,
+  },
+
+  profileArrow: {
+    fontSize: 22,
+    color: colors.blue,
+    marginLeft: 'auto',
   },
 });

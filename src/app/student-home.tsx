@@ -8,21 +8,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-const subjects = ['Maths', 'Physics', 'Chemistry', 'Biology'];
-
-const tutors = [
-  {
-    name: 'Tutor Name',
-    subject: 'Mathematics',
-    experience: '5+ years experience',
-  },
-  {
-    name: 'Tutor Name',
-    subject: 'Physics',
-    experience: '4+ years experience',
-  },
-];
+import { colors, radius, spacing, typography } from '../theme';
 
 export default function StudentHomeScreen() {
   return (
@@ -38,7 +24,10 @@ export default function StudentHomeScreen() {
             <Text style={styles.title}>Find your perfect tutor</Text>
           </View>
 
-          <TouchableOpacity style={styles.profileButton}>
+          <TouchableOpacity
+            style={styles.profileButton}
+            onPress={() => router.push('/student-profile')}
+          >
             <Text style={styles.profileText}>V</Text>
           </TouchableOpacity>
         </View>
@@ -47,83 +36,174 @@ export default function StudentHomeScreen() {
         <TouchableOpacity
           style={styles.searchContainer}
           onPress={() => router.push('/find-tutor')}
+          activeOpacity={0.8}
         >
           <Text style={styles.searchIcon}>⌕</Text>
 
           <Text style={styles.searchPlaceholder}>
             Search for a subject or tutor
           </Text>
+
+          <Text style={styles.searchArrow}>›</Text>
         </TouchableOpacity>
 
         {/* Subjects */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Explore subjects</Text>
 
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.push('/find-tutor')}
+          >
             <Text style={styles.seeAll}>See all</Text>
           </TouchableOpacity>
         </View>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.subjectsContainer}
+        <View style={styles.subjectRow}>
+          <TouchableOpacity
+            style={styles.subjectCard}
+            onPress={() => router.push('/find-tutor')}
+          >
+            <View style={styles.subjectIcon}>
+              <Text style={styles.subjectIconText}>M</Text>
+            </View>
+
+            <Text style={styles.subjectName}>Maths</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.subjectCard}
+            onPress={() => router.push('/find-tutor')}
+          >
+            <View style={styles.subjectIcon}>
+              <Text style={styles.subjectIconText}>P</Text>
+            </View>
+
+            <Text style={styles.subjectName}>Physics</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.subjectCard}
+            onPress={() => router.push('/find-tutor')}
+          >
+            <View style={styles.subjectIcon}>
+              <Text style={styles.subjectIconText}>C</Text>
+            </View>
+
+            <Text style={styles.subjectName}>Chemistry</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.subjectCard}
+            onPress={() => router.push('/find-tutor')}
+          >
+            <View style={styles.subjectIcon}>
+              <Text style={styles.subjectIconText}>B</Text>
+            </View>
+
+            <Text style={styles.subjectName}>Biology</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Recommended Tutors */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>
+            Recommended tutors
+          </Text>
+
+          <TouchableOpacity
+            onPress={() => router.push('/find-tutor')}
+          >
+            <Text style={styles.seeAll}>See all</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Tutor 1 */}
+        <TouchableOpacity
+          style={styles.tutorCard}
+          onPress={() => router.push('/tutor-profile')}
+          activeOpacity={0.8}
         >
-          {subjects.map((subject) => (
+          <View style={styles.tutorAvatar}>
+            <Text style={styles.tutorAvatarText}>T</Text>
+          </View>
+
+          <View style={styles.tutorInfo}>
+            <View style={styles.nameRow}>
+              <Text style={styles.tutorName}>Tutor Name</Text>
+
+              <View style={styles.verifiedBadge}>
+                <Text style={styles.verifiedText}>✓</Text>
+              </View>
+            </View>
+
+            <Text style={styles.tutorSubject}>
+              Mathematics
+            </Text>
+
+            <Text style={styles.tutorExperience}>
+              5+ years experience
+            </Text>
+          </View>
+
+          <Text style={styles.arrow}>›</Text>
+        </TouchableOpacity>
+
+        {/* Tutor 2 */}
+        <TouchableOpacity
+          style={styles.tutorCard}
+          onPress={() => router.push('/tutor-profile')}
+          activeOpacity={0.8}
+        >
+          <View style={styles.tutorAvatar}>
+            <Text style={styles.tutorAvatarText}>T</Text>
+          </View>
+
+          <View style={styles.tutorInfo}>
+            <View style={styles.nameRow}>
+              <Text style={styles.tutorName}>Tutor Name</Text>
+
+              <View style={styles.verifiedBadge}>
+                <Text style={styles.verifiedText}>✓</Text>
+              </View>
+            </View>
+
+            <Text style={styles.tutorSubject}>
+              Physics
+            </Text>
+
+            <Text style={styles.tutorExperience}>
+              4+ years experience
+            </Text>
+          </View>
+
+          <Text style={styles.arrow}>›</Text>
+        </TouchableOpacity>
+
+        {/* Find Tutor Banner */}
+        <View style={styles.banner}>
+          <View style={styles.bannerContent}>
+            <Text style={styles.bannerTitle}>
+              Can't find the right tutor?
+            </Text>
+
+            <Text style={styles.bannerText}>
+              Explore more tutors based on your subject,
+              class and location.
+            </Text>
+
             <TouchableOpacity
-              key={subject}
-              style={styles.subjectCard}
+              style={styles.bannerButton}
               onPress={() => router.push('/find-tutor')}
             >
-              <View style={styles.subjectIcon}>
-                <Text style={styles.subjectIconText}>
-                  {subject.charAt(0)}
-                </Text>
-              </View>
-
-              <Text style={styles.subjectText}>{subject}</Text>
+              <Text style={styles.bannerButtonText}>
+                Explore Tutors
+              </Text>
             </TouchableOpacity>
-          ))}
-        </ScrollView>
+          </View>
 
-        {/* Recommended tutors */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Recommended tutors</Text>
-
-          <TouchableOpacity>
-            <Text style={styles.seeAll}>See all</Text>
-          </TouchableOpacity>
+          <Text style={styles.bannerIcon}>🎓</Text>
         </View>
 
-        {tutors.map((tutor, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.tutorCard}
-            onPress={() => router.push('/tutor-profile')}
-          >
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
-                {tutor.name.charAt(0)}
-              </Text>
-            </View>
-
-            <View style={styles.tutorInfo}>
-              <Text style={styles.tutorName}>{tutor.name}</Text>
-
-              <Text style={styles.tutorSubject}>
-                {tutor.subject}
-              </Text>
-
-              <Text style={styles.tutorExperience}>
-                {tutor.experience}
-              </Text>
-            </View>
-
-            <Text style={styles.arrow}>›</Text>
-          </TouchableOpacity>
-        ))}
-
-        {/* Bottom spacing */}
         <View style={styles.bottomSpace} />
       </ScrollView>
     </SafeAreaView>
@@ -133,183 +213,268 @@ export default function StudentHomeScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
 
   container: {
-    paddingHorizontal: 20,
-    paddingTop: 15,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.md,
+    paddingBottom: 30,
   },
 
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+    justifyContent: 'space-between',
+    marginBottom: spacing.xl,
   },
 
   greeting: {
     fontSize: 14,
-    color: '#64748B',
+    color: colors.textSecondary,
     marginBottom: 5,
   },
 
   title: {
-    fontSize: 25,
+    fontSize: 27,
+    lineHeight: 33,
     fontWeight: '800',
-    color: '#0F172A',
+    color: colors.navy,
   },
 
   profileButton: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: '#DBEAFE',
+    width: 48,
+    height: 48,
+    borderRadius: radius.round,
+    backgroundColor: colors.lightBlue,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   profileText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#2563EB',
+    fontSize: 19,
+    fontWeight: '800',
+    color: colors.blue,
   },
 
   searchContainer: {
-    height: 54,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
+    height: 58,
+    backgroundColor: colors.white,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 30,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    paddingHorizontal: spacing.lg,
+    marginBottom: 38,
   },
 
   searchIcon: {
-    fontSize: 24,
-    color: '#64748B',
+    fontSize: 28,
+    color: colors.blue,
     marginRight: 10,
   },
 
   searchPlaceholder: {
+    flex: 1,
     fontSize: 15,
-    color: '#94A3B8',
+    color: colors.textMuted,
+  },
+
+  searchArrow: {
+    fontSize: 27,
+    color: colors.textMuted,
   },
 
   sectionHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 14,
   },
 
   sectionTitle: {
-    fontSize: 19,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontSize: 20,
+    fontWeight: '800',
+    color: colors.navy,
   },
 
   seeAll: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#2563EB',
+    fontWeight: '700',
+    color: colors.blue,
   },
 
-  subjectsContainer: {
-    gap: 12,
-    paddingBottom: 30,
+  subjectRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 38,
   },
 
   subjectCard: {
-    width: 100,
-    height: 105,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    flex: 1,
+    minHeight: 130,
+    backgroundColor: colors.white,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    paddingHorizontal: 5,
   },
 
   subjectIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: '#DBEAFE',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: colors.lightBlue,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
 
   subjectIconText: {
-    fontSize: 18,
+    fontSize: 21,
     fontWeight: '800',
-    color: '#2563EB',
+    color: colors.blue,
   },
 
-  subjectText: {
+  subjectName: {
     fontSize: 13,
-    fontWeight: '600',
-    color: '#334155',
+    fontWeight: '700',
+    color: colors.navy,
   },
 
   tutorCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
+    backgroundColor: colors.white,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    minHeight: 122,
+    padding: spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
   },
 
-  avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: '#DBEAFE',
+  tutorAvatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: colors.lightBlue,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
+    marginRight: 16,
   },
 
-  avatarText: {
-    fontSize: 20,
+  tutorAvatarText: {
+    fontSize: 23,
     fontWeight: '800',
-    color: '#2563EB',
+    color: colors.blue,
   },
 
   tutorInfo: {
     flex: 1,
   },
 
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
   tutorName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginBottom: 4,
+    fontSize: 17,
+    fontWeight: '800',
+    color: colors.navy,
+  },
+
+  verifiedBadge: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: colors.blue,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 7,
+  },
+
+  verifiedText: {
+    color: colors.white,
+    fontSize: 10,
+    fontWeight: '800',
   },
 
   tutorSubject: {
     fontSize: 14,
-    color: '#475569',
-    marginBottom: 3,
+    color: colors.textSecondary,
+    marginTop: 5,
   },
 
   tutorExperience: {
     fontSize: 12,
-    color: '#94A3B8',
+    color: colors.textMuted,
+    marginTop: 5,
   },
 
   arrow: {
-    fontSize: 28,
-    color: '#94A3B8',
+    fontSize: 30,
+    color: colors.textMuted,
+    marginLeft: 8,
+  },
+
+  banner: {
+    backgroundColor: colors.navy,
+    borderRadius: radius.xl,
+    marginTop: 24,
+    padding: spacing.xl,
+    minHeight: 170,
+    flexDirection: 'row',
+    overflow: 'hidden',
+  },
+
+  bannerContent: {
+    flex: 1,
+    zIndex: 2,
+  },
+
+  bannerTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: colors.white,
+    marginBottom: 8,
+  },
+
+  bannerText: {
+    fontSize: 12,
+    lineHeight: 18,
+    color: '#D8E6F2',
+    maxWidth: 240,
+    marginBottom: 16,
+  },
+
+  bannerButton: {
+    alignSelf: 'flex-start',
+    backgroundColor: colors.teal,
+    borderRadius: radius.md,
+    paddingHorizontal: 15,
+    paddingVertical: 9,
+  },
+
+  bannerButtonText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: colors.navy,
+  },
+
+  bannerIcon: {
+    position: 'absolute',
+    right: 12,
+    bottom: 12,
+    fontSize: 48,
+    opacity: 0.7,
   },
 
   bottomSpace: {
-    height: 30,
+    height: 20,
   },
 });

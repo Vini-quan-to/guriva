@@ -8,27 +8,32 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-const filters = ['Subject', 'Class', 'Location', 'Experience'];
+import { colors, radius, spacing } from '../theme';
 
 const tutors = [
   {
     name: 'Aarav Sharma',
     subject: 'Mathematics',
-    experience: '5 years',
-    location: 'Pune',
+    experience: '5+ years experience',
+    rating: '4.8',
+    students: '120+ students',
+    initial: 'A',
   },
   {
-    name: 'Priya Verma',
+    name: 'Riya Mehta',
     subject: 'Physics',
-    experience: '4 years',
-    location: 'Pune',
+    experience: '6+ years experience',
+    rating: '4.9',
+    students: '95+ students',
+    initial: 'R',
   },
   {
-    name: 'Rahul Singh',
+    name: 'Karan Verma',
     subject: 'Chemistry',
-    experience: '6 years',
-    location: 'Online',
+    experience: '4+ years experience',
+    rating: '4.7',
+    students: '80+ students',
+    initial: 'K',
   },
 ];
 
@@ -36,8 +41,8 @@ export default function FindTutorScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
-        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
       >
         {/* Header */}
         <View style={styles.header}>
@@ -47,17 +52,23 @@ export default function FindTutorScreen() {
 
           <Text style={styles.headerTitle}>Find a Tutor</Text>
 
-          <View style={styles.headerSpace} />
+          <TouchableOpacity style={styles.filterButton}>
+            <Text style={styles.filterIcon}>☷</Text>
+          </TouchableOpacity>
         </View>
 
+        <Text style={styles.subtitle}>
+          Find the right tutor for your learning goals.
+        </Text>
+
         {/* Search */}
-        <View style={styles.searchBox}>
+        <View style={styles.searchContainer}>
           <Text style={styles.searchIcon}>⌕</Text>
 
           <TextInput
             style={styles.searchInput}
             placeholder="Search subject or tutor"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={colors.textMuted}
           />
         </View>
 
@@ -65,57 +76,118 @@ export default function FindTutorScreen() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filters}
+          contentContainerStyle={styles.filterRow}
         >
-          {filters.map((filter) => (
-            <TouchableOpacity key={filter} style={styles.filterButton}>
-              <Text style={styles.filterText}>{filter}</Text>
-              <Text style={styles.filterArrow}>⌄</Text>
-            </TouchableOpacity>
-          ))}
+          <TouchableOpacity style={styles.activeFilter}>
+            <Text style={styles.activeFilterText}>All</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.filterChip}>
+            <Text style={styles.filterText}>Subject</Text>
+            <Text style={styles.filterArrow}>⌄</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.filterChip}>
+            <Text style={styles.filterText}>Class</Text>
+            <Text style={styles.filterArrow}>⌄</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.filterChip}>
+            <Text style={styles.filterText}>Location</Text>
+            <Text style={styles.filterArrow}>⌄</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.filterChip}>
+            <Text style={styles.filterText}>Experience</Text>
+            <Text style={styles.filterArrow}>⌄</Text>
+          </TouchableOpacity>
         </ScrollView>
 
-        {/* Results */}
+        {/* Results Header */}
         <View style={styles.resultsHeader}>
-          <Text style={styles.resultsTitle}>Tutors near you</Text>
+          <View>
+            <Text style={styles.resultsTitle}>Recommended tutors</Text>
+            <Text style={styles.resultsCount}>24 tutors found</Text>
+          </View>
 
-          <Text style={styles.resultCount}>24 tutors</Text>
+          <TouchableOpacity>
+            <Text style={styles.sortText}>Sort by</Text>
+          </TouchableOpacity>
         </View>
 
+        {/* Tutor Cards */}
         {tutors.map((tutor) => (
           <TouchableOpacity
             key={tutor.name}
             style={styles.tutorCard}
             onPress={() => router.push('/tutor-profile')}
+            activeOpacity={0.85}
           >
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
-                {tutor.name.charAt(0)}
-              </Text>
-            </View>
+            <View style={styles.tutorTop}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{tutor.initial}</Text>
+              </View>
 
-            <View style={styles.tutorInfo}>
-              <Text style={styles.tutorName}>{tutor.name}</Text>
+              <View style={styles.tutorInfo}>
+                <View style={styles.nameRow}>
+                  <Text style={styles.tutorName}>{tutor.name}</Text>
 
-              <Text style={styles.subject}>{tutor.subject}</Text>
+                  <View style={styles.verifiedBadge}>
+                    <Text style={styles.verifiedText}>✓</Text>
+                  </View>
+                </View>
 
-              <Text style={styles.details}>
-                {tutor.experience} • {tutor.location}
-              </Text>
+                <Text style={styles.subject}>{tutor.subject}</Text>
 
-              <View style={styles.ratingRow}>
-                <Text style={styles.star}>★</Text>
-                <Text style={styles.rating}>4.8</Text>
-
-                <Text style={styles.reviews}>
-                  (32 reviews)
+                <Text style={styles.experience}>
+                  {tutor.experience}
                 </Text>
               </View>
+
+              <Text style={styles.cardArrow}>›</Text>
             </View>
 
-            <Text style={styles.arrow}>›</Text>
+            <View style={styles.divider} />
+
+            <View style={styles.tutorBottom}>
+              <View style={styles.ratingContainer}>
+                <Text style={styles.star}>★</Text>
+                <Text style={styles.rating}>{tutor.rating}</Text>
+              </View>
+
+              <Text style={styles.students}>
+                {tutor.students}
+              </Text>
+
+              <View style={styles.onlineBadge}>
+                <Text style={styles.onlineText}>Online</Text>
+              </View>
+            </View>
           </TouchableOpacity>
         ))}
+
+        {/* More Results */}
+        <View style={styles.moreCard}>
+          <Text style={styles.moreTitle}>
+            Looking for something specific?
+          </Text>
+
+          <Text style={styles.moreText}>
+            Use filters to find tutors based on subject, class,
+            location and experience.
+          </Text>
+
+          <TouchableOpacity
+            style={styles.exploreButton}
+            onPress={() => router.push('/tutor-profile')}
+          >
+            <Text style={styles.exploreButtonText}>
+              Explore Tutors
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.bottomSpace} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -124,16 +196,16 @@ export default function FindTutorScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
 
   container: {
-    paddingHorizontal: 20,
-    paddingBottom: 30,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.md,
+    paddingBottom: 35,
   },
 
   header: {
-    height: 55,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -141,165 +213,293 @@ const styles = StyleSheet.create({
 
   back: {
     fontSize: 36,
-    color: '#0F172A',
+    lineHeight: 38,
+    color: colors.navy,
   },
 
   headerTitle: {
-    fontSize: 19,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontSize: 21,
+    fontWeight: '800',
+    color: colors.navy,
   },
 
-  headerSpace: {
-    width: 25,
-  },
-
-  searchBox: {
-    height: 54,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
+  filterButton: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.md,
+    backgroundColor: colors.white,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  filterIcon: {
+    fontSize: 21,
+    color: colors.navy,
+  },
+
+  subtitle: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    marginTop: 5,
+    marginBottom: spacing.xl,
+  },
+
+  searchContainer: {
+    height: 55,
+    backgroundColor: colors.white,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 15,
-    marginTop: 10,
-    marginBottom: 15,
+    paddingHorizontal: spacing.lg,
   },
 
   searchIcon: {
-    fontSize: 23,
-    color: '#64748B',
-    marginRight: 10,
+    fontSize: 27,
+    color: colors.blue,
+    marginRight: 9,
   },
 
   searchInput: {
     flex: 1,
-    fontSize: 15,
-    color: '#0F172A',
+    fontSize: 14,
+    color: colors.navy,
   },
 
-  filters: {
-    gap: 10,
-    paddingBottom: 25,
+  filterRow: {
+    gap: 9,
+    paddingVertical: spacing.lg,
   },
 
-  filterButton: {
-    height: 40,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    backgroundColor: '#FFFFFF',
+  activeFilter: {
+    backgroundColor: colors.navy,
+    borderRadius: radius.round,
+    paddingHorizontal: 17,
+    paddingVertical: 9,
+  },
+
+  activeFilterText: {
+    color: colors.white,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+
+  filterChip: {
+    backgroundColor: colors.white,
+    borderRadius: radius.round,
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: colors.border,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
     flexDirection: 'row',
     alignItems: 'center',
   },
 
   filterText: {
-    fontSize: 13,
+    color: colors.navy,
+    fontSize: 12,
     fontWeight: '600',
-    color: '#334155',
   },
 
   filterArrow: {
-    fontSize: 15,
-    color: '#64748B',
-    marginLeft: 7,
+    color: colors.textSecondary,
+    marginLeft: 5,
+    fontSize: 13,
   },
 
   resultsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
+    alignItems: 'flex-end',
+    marginTop: 8,
+    marginBottom: spacing.md,
   },
 
   resultsTitle: {
     fontSize: 19,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontWeight: '800',
+    color: colors.navy,
   },
 
-  resultCount: {
-    fontSize: 13,
-    color: '#64748B',
+  resultsCount: {
+    fontSize: 12,
+    color: colors.textMuted,
+    marginTop: 4,
+  },
+
+  sortText: {
+    color: colors.blue,
+    fontSize: 12,
+    fontWeight: '700',
   },
 
   tutorCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: 'row',
-    marginBottom: 12,
+    backgroundColor: colors.white,
+    borderRadius: radius.xl,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
+    padding: spacing.lg,
+    marginBottom: 12,
+  },
+
+  tutorTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 
   avatar: {
     width: 58,
     height: 58,
     borderRadius: 29,
-    backgroundColor: '#DBEAFE',
+    backgroundColor: colors.lightBlue,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
+    marginRight: 13,
   },
 
   avatarText: {
     fontSize: 21,
     fontWeight: '800',
-    color: '#2563EB',
+    color: colors.blue,
   },
 
   tutorInfo: {
     flex: 1,
   },
 
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
   tutorName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginBottom: 4,
+    fontSize: 15,
+    fontWeight: '800',
+    color: colors.navy,
+  },
+
+  verifiedBadge: {
+    width: 17,
+    height: 17,
+    borderRadius: 9,
+    backgroundColor: colors.blue,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 6,
+  },
+
+  verifiedText: {
+    color: colors.white,
+    fontSize: 9,
+    fontWeight: '800',
   },
 
   subject: {
-    fontSize: 14,
-    color: '#475569',
-    marginBottom: 4,
+    fontSize: 13,
+    color: colors.blue,
+    fontWeight: '600',
+    marginTop: 4,
   },
 
-  details: {
-    fontSize: 12,
-    color: '#64748B',
-    marginBottom: 7,
+  experience: {
+    fontSize: 11,
+    color: colors.textSecondary,
+    marginTop: 4,
   },
 
-  ratingRow: {
+  cardArrow: {
+    fontSize: 29,
+    color: colors.textMuted,
+    marginLeft: 7,
+  },
+
+  divider: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginVertical: 14,
+  },
+
+  tutorBottom: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
 
   star: {
-    fontSize: 13,
-    color: '#F59E0B',
+    color: colors.teal,
+    fontSize: 14,
+    marginRight: 4,
   },
 
   rating: {
+    color: colors.navy,
     fontSize: 12,
     fontWeight: '700',
-    color: '#334155',
-    marginLeft: 4,
   },
 
-  reviews: {
+  students: {
+    fontSize: 11,
+    color: colors.textSecondary,
+    marginLeft: 15,
+    flex: 1,
+  },
+
+  onlineBadge: {
+    backgroundColor: colors.successLight,
+    borderRadius: radius.round,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+  },
+
+  onlineText: {
+    color: colors.success,
+    fontSize: 10,
+    fontWeight: '700',
+  },
+
+  moreCard: {
+    backgroundColor: colors.navy,
+    borderRadius: radius.xl,
+    padding: spacing.xl,
+    marginTop: 10,
+  },
+
+  moreTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: colors.white,
+    marginBottom: 7,
+  },
+
+  moreText: {
     fontSize: 12,
-    color: '#94A3B8',
-    marginLeft: 4,
+    lineHeight: 18,
+    color: '#D8E6F2',
+    marginBottom: 15,
   },
 
-  arrow: {
-    fontSize: 28,
-    color: '#94A3B8',
-    alignSelf: 'center',
+  exploreButton: {
+    alignSelf: 'flex-start',
+    backgroundColor: colors.teal,
+    borderRadius: radius.md,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+
+  exploreButtonText: {
+    color: colors.navy,
+    fontSize: 12,
+    fontWeight: '800',
+  },
+
+  bottomSpace: {
+    height: 20,
   },
 });
